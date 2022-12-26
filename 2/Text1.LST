@@ -1,0 +1,90 @@
+C51 COMPILER V7.06   TEXT1                                                                 04/27/2020 15:45:29 PAGE 1   
+
+
+C51 COMPILER V7.06, COMPILATION OF MODULE TEXT1
+OBJECT MODULE PLACED IN Text1.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Text1.c BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include <reg51.h>
+   2          #include <intrins.h>
+   3          #define uint unsigned int
+   4          #define uchar unsigned char
+   5          sbit DULA=P2^6;
+   6          sbit WELA=P2^7;
+   7          sbit D1=P1^0;
+   8          uchar num,temp,tt,a;
+   9          uchar code table[]={
+  10             0x3f,0x06,0x5b,0x4f,
+  11             0x66,0x6d,0x7d,0x07,
+  12             0x7f,0x6f,0x77,0x7c,
+  13             0x39,0x5e,0x79,0x71};
+  14          void main() 
+  15          {    
+  16   1         num=0;tt=0;temp=0;a=0;
+  17   1         TMOD=0x01;//设置定时器0工作且工作方式为1
+  18   1         TH0=(65536-50000)/256;//设置N=50000(即50MS)时TH0（高八位）的初值
+  19   1         TL0=(65536-50000)%256;//设置N=50000(即50MS)时TL0（低八位）的初值
+  20   1         EA=1;//打开总中断
+  21   1         ET0=1;//打开定时器0中断允许
+  22   1         TR0=1;//启动定时器0
+  23   1         IT0=0;//设置中断触发方式为电平触发方式（默认为电平触发方式）
+  24   1         temp=0xfe;
+  25   1         P1=temp;
+  26   1         WELA=1;//打开位选
+  27   1         P0=0xc0;//选位
+  28   1         WELA=0;//锁存（关闭）位选
+  29   1         DULA=1;
+  30   1         P0=0x3f;
+  31   1         DULA=0;
+  32   1         while (1)
+  33   1            {
+  34   2               ;
+  35   2            }
+  36   1      }
+  37           void exter0() interrupt 1//这里是中断序号
+  38           {
+  39   1          TH0=(65536-50000)/256;
+  40   1          TL0=(65536-50000)%256;//当定时器加满后再赋一次初值
+  41   1          tt++;//记录定时器加满的次数（加满一次为N*1微秒，即50MS）
+  42   1          if(tt/10==0)
+  43   1          {
+  44   2             temp=_crol_(temp,1);
+  45   2                     P1=temp;
+  46   2          }
+  47   1          if(tt==20)//计时器加满20次，即已计时1S
+  48   1                  {
+  49   2                     /*temp=_crol_(temp,1);
+  50   2                     P1=temp;*/
+  51   2                    /* a++;
+  52   2                     if(a/2==0)
+  53   2                     {
+  54   2                        temp=_crol_(temp,1);
+  55   2                     P1=temp;
+C51 COMPILER V7.06   TEXT1                                                                 04/27/2020 15:45:29 PAGE 2   
+
+  56   2                     }*/
+  57   2                     tt=0;//使计时器进入下一个1S的计时
+  58   2                     num++;
+  59   2                     if(num==16)
+  60   2                        num=0;
+  61   2                     DULA=1;//打开段选
+  62   2                     P0=table[num];//选段
+  63   2                     DULA=0;//关闭段选
+  64   2                  }
+  65   1       }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    141    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
